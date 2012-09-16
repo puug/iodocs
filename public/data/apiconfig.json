@@ -51,5 +51,12 @@
              "version": "1.0",
              "crypt": "HMAC-SHA1"
         }
+    },
+    "joindinv2": {
+        "name": "Joind.in API v2",
+        "protocol": "http",
+        "baseURL": "api.dev.joind.in:8080",
+        "publicPath": "",
+        "auth": ""
     }
 }
