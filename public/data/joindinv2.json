@@ -1,0 +1,481 @@
+{
+    "endpoints": [
+        {
+            "name": "Events",
+            "methods": [
+                {
+                    "MethodName": "Event Filters",
+                    "Synopsis": "List of available event lists, sorted in different ways",
+                    "HTTPMethod": "GET",
+                    "URI": "/",
+                    "RequiresOAuth": "N",
+                    "parameters": [
+                        {
+                            "Name": "format",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Output format as JSON or HTML",
+                            "EnumeratedList": [
+                                "json",
+                                "html"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "MethodName": "Events List",
+                    "Synopsis": "List events",
+                    "HTTPMethod": "GET",
+                    "URI": "/v2.1/events",
+                    "RequiresOAuth": "N",
+                    "parameters": [
+                        {
+                            "Name": "format",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Output format as JSON or HTML",
+                            "EnumeratedList": [
+                                "json",
+                                "html"
+                            ]
+                        },
+                        {
+                            "Name": "resultsperpage",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "How many results to show per page in the results (zero for no pagination)"
+                        },
+                        {
+                            "Name": "start",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "Which page number of results to show"
+                        },
+                        {
+                            "Name": "verbose",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Whether to return verbose detail in the results",
+                            "EnumeratedList": [
+                                "",
+                                "yes"
+                            ]
+                        },
+                        {
+                            "Name": "filter",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "What kind of event list to return",
+                            "EnumeratedList": [
+                                "",
+                                "hot",
+                                "upcoming",
+                                "past",
+                                "cfp"
+                            ],
+                            "EnumeratedDescription": {
+                                "": "Default sorting (by descending date)",
+                                "hot": "Specialised sorting with soon/recent and well-attended events first",
+                                "upcoming": "Future events, including current ones, sorted by date",
+                                "past": "Past events, with most recent first, sorted by date descending",
+                                "cfp": "Events with a call for papers currently open"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "MethodName": "Event Detail",
+                    "Synopsis": "Information about a single event",
+                    "HTTPMethod": "GET",
+                    "URI": "/v2.1/events/:event_id",
+                    "RequiresOAuth": "N",
+                    "parameters": [
+                        {
+                            "Name": "format",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Output format as JSON or HTML",
+                            "EnumeratedList": [
+                                "json",
+                                "html"
+                            ]
+                        },
+                        {
+                            "Name": "verbose",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Whether to return verbose detail in the results",
+                            "EnumeratedList": [
+                                "",
+                                "yes"
+                            ]
+                        },
+                        {
+                            "Name": "event_id",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "ID of the event whose talks should be returned"
+                        }
+                    ]
+                },
+                {
+                    "MethodName": "Event Comments",
+                    "Synopsis": "Show the comments made on an event", 
+                    "HTTPMethod": "GET",
+                    "URI": "/v2.1/events/:event_id/comments",
+                    "RequiresOAuth": "N",
+                    "parameters": [
+                        {
+                            "Name": "format",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Output format as JSON or HTML",
+                            "EnumeratedList": [
+                                "json",
+                                "html"
+                            ]
+                        },
+                        {
+                            "Name": "resultsperpage",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "How many results to show per page in the results (zero for no pagination)"
+                        },
+                        {
+                            "Name": "start",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "Which page number of results to show"
+                        },
+                        {
+                            "Name": "verbose",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Whether to return verbose detail in the results",
+                            "EnumeratedList": [
+                                "",
+                                "yes"
+                            ]
+                        },
+                        {
+                            "Name": "event_id",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "ID of the event to show"
+                        }
+                    ]
+                }
+
+            ]
+        },
+        {
+            "name": "Talks",
+            "methods": [
+                {
+                    "MethodName": "Talks by Event",
+                    "Synopsis": "Show the sessions associated with a particular event",
+                    "HTTPMethod": "GET",
+                    "URI": "/v2.1/events/:event_id/talks",
+                    "RequiresOAuth": "N",
+                    "parameters": [
+                        {
+                            "Name": "format",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Output format as JSON or HTML",
+                            "EnumeratedList": [
+                                "json",
+                                "html"
+                            ]
+                        },
+                        {
+                            "Name": "resultsperpage",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "How many results to show per page in the results (zero for no pagination)"
+                        },
+                        {
+                            "Name": "start",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "Which page number of results to show"
+                        },
+                        {
+                            "Name": "verbose",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Whether to return verbose detail in the results",
+                            "EnumeratedList": [
+                                "",
+                                "yes"
+                            ]
+                        },
+                        {
+                            "Name": "event_id",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "ID of the event whose talks should be returned"
+                        }
+                    ]
+                },
+                {
+                    "MethodName": "Talk Detail",
+                    "Synopsis": "Show the detail of a particular talk", 
+                    "HTTPMethod": "GET",
+                    "URI": "/v2.1/talks/:talk_id",
+                    "RequiresOAuth": "N",
+                    "parameters": [
+                        {
+                            "Name": "format",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Output format as JSON or HTML",
+                            "EnumeratedList": [
+                                "json",
+                                "html"
+                            ]
+                        },
+                        {
+                            "Name": "verbose",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Whether to return verbose detail in the results",
+                            "EnumeratedList": [
+                                "",
+                                "yes"
+                            ]
+                        },
+                        {
+                            "Name": "talk_id",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "ID of the talk to show"
+                        }
+                    ]
+                },
+                {
+                    "MethodName": "Talk Comments",
+                    "Synopsis": "Show the comments made on a talk", 
+                    "HTTPMethod": "GET",
+                    "URI": "/v2.1/talks/:talk_id/comments",
+                    "RequiresOAuth": "N",
+                    "parameters": [
+                        {
+                            "Name": "format",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Output format as JSON or HTML",
+                            "EnumeratedList": [
+                                "json",
+                                "html"
+                            ]
+                        },
+                        {
+                            "Name": "resultsperpage",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "How many results to show per page in the results (zero for no pagination)"
+                        },
+                        {
+                            "Name": "start",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "Which page number of results to show"
+                        },
+                        {
+                            "Name": "verbose",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Whether to return verbose detail in the results",
+                            "EnumeratedList": [
+                                "",
+                                "yes"
+                            ]
+                        },
+                        {
+                            "Name": "talk_id",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "ID of the talk to show"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Users",
+            "methods": [
+                {
+                    "MethodName": "User Detail",
+                    "Synopsis": "Return information about a user", 
+                    "HTTPMethod": "GET",
+                    "URI": "/v2.1/users/:user_id",
+                    "RequiresOAuth": "N",
+                    "parameters": [
+                        {
+                            "Name": "format",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Output format as JSON or HTML",
+                            "EnumeratedList": [
+                                "json",
+                                "html"
+                            ]
+                        },
+                        {
+                            "Name": "verbose",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Whether to return verbose detail in the results",
+                            "EnumeratedList": [
+                                "",
+                                "yes"
+                            ]
+                        },
+                        {
+                            "Name": "user_id",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "ID of the user to be returned"
+                        }
+                    ]
+                },
+                {
+                    "MethodName": "Events Attended By User",
+                    "Synopsis": "List of events attended by a particular user", 
+                    "HTTPMethod": "GET",
+                    "URI": "/v2.1/users/:user_id/attended",
+                    "RequiresOAuth": "N",
+                    "parameters": [
+                        {
+                            "Name": "format",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Output format as JSON or HTML",
+                            "EnumeratedList": [
+                                "json",
+                                "html"
+                            ]
+                        },
+                        {
+                            "Name": "resultsperpage",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "How many results to show per page in the results (zero for no pagination)"
+                        },
+                        {
+                            "Name": "start",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "Which page number of results to show"
+                        },
+                        {
+                            "Name": "verbose",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Whether to return verbose detail in the results",
+                            "EnumeratedList": [
+                                "",
+                                "yes"
+                            ]
+                        },
+                        {
+                            "Name": "user_id",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "ID of the user whose events should be returned"
+                        }
+                    ]
+                },
+                {
+                    "MethodName": "Talks Given By User",
+                    "Synopsis": "List of talks that this user is one of the speakers for", 
+                    "HTTPMethod": "GET",
+                    "URI": "/v2.1/users/:user_id/talks",
+                    "RequiresOAuth": "N",
+                    "parameters": [
+                        {
+                            "Name": "format",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Output format as JSON or HTML",
+                            "EnumeratedList": [
+                                "json",
+                                "html"
+                            ]
+                        },
+                        {
+                            "Name": "resultsperpage",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "How many results to show per page in the results (zero for no pagination)"
+                        },
+                        {
+                            "Name": "start",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "Which page number of results to show"
+                        },
+                        {
+                            "Name": "verbose",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Whether to return verbose detail in the results",
+                            "EnumeratedList": [
+                                "",
+                                "yes"
+                            ]
+                        },
+                        {
+                            "Name": "user_id",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "ID of the user whose talks should be returned"
+                        }
+                    ]
+                }
+            ]
+        }
+
+    ]
+}
