@@ -7,6 +7,14 @@
         "auth": "key",
         "keyParam": "api_key"
     },
+    "github": {
+        "name": "Github API",
+        "protocol": "https",
+        "baseURL": "api.github.com",
+        "publicPath": "",
+        "auth": "",
+        "keyParam": ""
+    },
     "klout": {
         "name": "Klout API",
         "protocol": "http",
