@@ -1,4 +1,12 @@
 {
+    "etsy": {
+        "name": "Etsy API",
+        "protocol": "http",
+        "baseURL": "openapi.etsy.com",
+        "publicPath": "/v2",
+        "auth": "key",
+        "keyParam": "api_key"
+    },
     "klout": {
         "name": "Klout API",
         "protocol": "http",
