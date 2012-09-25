@@ -3,54 +3,7 @@
         {
             "name": "Events",
             "methods": [
-                {
-                    "MethodName": "Add Talk Comment",
-                    "Synopsis": "Comment on and rate a talk",
-                    "HTTPMethod": "POST",
-                    "URI": "/v2.1/talks/:talk_id/comments",
-                    "RequiresOAuth": "Y",
-                    "parameters": [
-                        {
-                            "Name": "talk_id",
-                            "Required": "Y",
-                            "Default": "",
-                            "Type": "integer",
-                            "Description": "ID of the talk to show"
-                        },
-                        {
-                            "Name": "rating",
-                            "Required": "Y",
-                            "Default": "",
-                            "Type": "enumerated",
-                            "Description": "Talk rating from 1 (lowest) to 5 (highest)",
-                            "EnumeratedList": [
-                                "1",
-                                "2",
-                                "3",
-                                "4",
-                                "5"
-                            ]
-                        },
-                        {
-                            "Name": "comment",
-                            "Required": "N",
-                            "Default": "",
-                            "Type": "string",
-                            "Description": "Comment on the talk"
-                        },
-                        {
-                            "Name": "format",
-                            "Required": "N",
-                            "Default": "",
-                            "Type": "enumerated",
-                            "Description": "Output format as JSON or HTML",
-                            "EnumeratedList": [
-                                "json",
-                                "html"
-                            ]
-                        }
-                    ]
-                },
+                
                 {
                     "MethodName": "Event Filters",
                     "Synopsis": "List of available event lists, sorted in different ways",
@@ -286,6 +239,43 @@
                     ]
                 },
                 {
+                    "MethodName": "Add A New Talk",
+                    "Synopsis": "Create a talk on an event",
+                    "HTTPMethod": "POST",
+                    "URI": "/v2.1/events/:event_id/talks",
+                    "RequiresOAuth": "Y",
+                    "parameters": [
+                        {
+                            "Name": "event_id",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "ID of the event to add a talk to"
+                        },
+                        {
+                            "Name": "talk_title",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "string",
+                            "Description": "Title of the talk or session" 
+                        },
+                        {
+                            "Name": "talk_description",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "string",
+                            "Description": "Longer description of the talk contents, or talk abstract"
+                        },
+                        {
+                            "Name": "start_date",
+                            "Required": "Y",
+                            "Default": "2012-05-19T17:30:00+02:00",
+                            "Type":"string",
+                            "Description": "Date and time of this talk, in ISO 860 format"
+                        }
+                    ]
+                },
+                {
                     "MethodName": "Talk Detail",
                     "Synopsis": "Show the detail of a particular talk", 
                     "HTTPMethod": "GET",
@@ -372,6 +362,43 @@
                             "Default": "",
                             "Type": "integer",
                             "Description": "ID of the talk to show"
+                        }
+                    ]
+                },
+                {
+                    "MethodName": "Add Talk Comment",
+                    "Synopsis": "Comment on and rate a talk",
+                    "HTTPMethod": "POST",
+                    "URI": "/v2.1/talks/:talk_id/comments",
+                    "RequiresOAuth": "Y",
+                    "parameters": [
+                        {
+                            "Name": "talk_id",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "ID of the talk to show"
+                        },
+                        {
+                            "Name": "rating",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Talk rating from 1 (lowest) to 5 (highest)",
+                            "EnumeratedList": [
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5"
+                            ]
+                        },
+                        {
+                            "Name": "comment",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "string",
+                            "Description": "Comment on the talk"
                         }
                     ]
                 }

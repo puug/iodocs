@@ -69,7 +69,7 @@
         }
     },
     "joindinv2": {
-        "name": "Joind.in API v2",
+        "name": "Joind.in Test API v2",
         "protocol": "http",
         "sendFormat": "json",
         "baseURL": "test.api.joind.in",
