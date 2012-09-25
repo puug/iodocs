@@ -319,7 +319,12 @@ function processRequest(req, res, next) {
         };
 
     if (['POST','DELETE','PUT'].indexOf(httpMethod) !== -1) {
-        var requestBody = query.stringify(params);
+        // handle JSON senders
+        if (apiConfig.sendFormat && apiConfig.sendFormat == 'json') {
+            var requestBody = JSON.stringify(params);
+        } else {
+            var requestBody = query.stringify(params);
+        }
     }
 
     if (apiConfig.oauth) {
@@ -536,7 +541,11 @@ function processRequest(req, res, next) {
         }
 
         if (requestBody) {
-            options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+            if (apiConfig.sendFormat && apiConfig.sendFormat == 'json') {
+                options.headers['Content-Type'] = 'application/json';
+            } else {
+                options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+            }
         }
 
         if (config.debug) {
