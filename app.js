@@ -125,7 +125,7 @@ function oauth(req, res, next) {
     var apiName = req.body.apiName,
         apiConfig = apisConfig[apiName];
 
-    if (apiConfig.oauth) {
+    if (apiConfig.auth == "oauth") {
         var apiKey = req.body.apiKey || req.body.key,
             apiSecret = req.body.apiSecret || req.body.secret,
             refererURL = url.parse(req.headers.referer),
@@ -476,8 +476,8 @@ function processRequest(req, res, next) {
             options.path += ((paramString.length > 0) ? '?' + paramString : "");
         }
 
-        // Add API Key to params, if any.
-        if (apiKey != '' && apiKey != 'undefined' && apiKey != undefined) {
+        // Add API Key to params, if any (except if it's OAuth2)
+        if (apiKey != '' && apiKey != 'undefined' && apiKey != undefined && apiConfig.auth != "oauth2") {
             if (options.path.indexOf('?') !== -1) {
                 options.path += '&';
             }
@@ -520,6 +520,10 @@ function processRequest(req, res, next) {
             }
 
             options.headers = headers;
+        }
+
+        if (apiConfig.auth == 'oauth2' && req.body.oauth == 'authrequired') {
+            options.headers['Authorization'] = "OAuth " + req.body.apiKey;
         }
 
         if (!options.headers['Content-Length']) {
@@ -699,6 +703,8 @@ app.get('/:api([^\.]+)', function(req, res) {
 
 if (!module.parent) {
     var port = process.env.PORT || config.port;
-    app.listen(port);
-    console.log("Express server listening on port %d", app.address().port);
+    var l = app.listen(port);
+    l.on('listening', function(err) {
+        console.log("Express server listening on port %d", app.address().port);
+    });
 }
