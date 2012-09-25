@@ -72,7 +72,7 @@
         "name": "Joind.in API v2",
         "protocol": "http",
         "sendFormat": "json",
-        "baseURL": "api.joindin.local",
+        "baseURL": "test.api.joind.in",
         "publicPath": "",
         "auth": "oauth2",
         "oauth": {
