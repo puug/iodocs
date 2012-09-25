@@ -4,11 +4,59 @@
             "name": "Events",
             "methods": [
                 {
+                    "MethodName": "Add Talk Comment",
+                    "Synopsis": "Comment on and rate a talk",
+                    "HTTPMethod": "POST",
+                    "URI": "/v2.1/talks/:talk_id/comments",
+                    "RequiresOAuth": "Y",
+                    "parameters": [
+                        {
+                            "Name": "talk_id",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "integer",
+                            "Description": "ID of the talk to show"
+                        },
+                        {
+                            "Name": "rating",
+                            "Required": "Y",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Talk rating from 1 (lowest) to 5 (highest)",
+                            "EnumeratedList": [
+                                "1",
+                                "2",
+                                "3",
+                                "4",
+                                "5"
+                            ]
+                        },
+                        {
+                            "Name": "comment",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "string",
+                            "Description": "Comment on the talk"
+                        },
+                        {
+                            "Name": "format",
+                            "Required": "N",
+                            "Default": "",
+                            "Type": "enumerated",
+                            "Description": "Output format as JSON or HTML",
+                            "EnumeratedList": [
+                                "json",
+                                "html"
+                            ]
+                        }
+                    ]
+                },
+                {
                     "MethodName": "Event Filters",
                     "Synopsis": "List of available event lists, sorted in different ways",
                     "HTTPMethod": "GET",
                     "URI": "/",
-                    "RequiresOAuth": "N",
+                    "RequiresOAuth": "Y",
                     "parameters": [
                         {
                             "Name": "format",
