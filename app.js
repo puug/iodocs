@@ -528,7 +528,7 @@ function processRequest(req, res, next) {
         }
 
         if (apiConfig.auth == 'oauth2' && req.body.oauth == 'authrequired') {
-            options.headers['Authorization'] = "OAuth " + req.body.apiKey;
+            options.headers['Authorization'] = apiConfig.keyParam + " " + req.body.apiKey;
         }
 
         if (!options.headers['Content-Length']) {

@@ -12,8 +12,11 @@
         "protocol": "https",
         "baseURL": "api.github.com",
         "publicPath": "",
-        "auth": "",
-        "keyParam": ""
+        "sendFormat": "json",
+        "auth": "oauth2",
+        "keyParam": "token",
+        "oauth": {
+        }
     },
     "klout": {
         "name": "Klout API",
@@ -75,6 +78,7 @@
         "baseURL": "test.api.joind.in",
         "publicPath": "",
         "auth": "oauth2",
+        "keyParam":"OAuth",
         "oauth": {
         }
     }
