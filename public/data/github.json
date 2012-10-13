@@ -47,6 +47,44 @@
                      "Description":"ID of the gist to fetch"
                   }
                ]
+            },
+            {
+               "MethodName":"Gist Comments",
+               "Synopsis":"See a gist's comments",
+               "HTTPMethod":"GET",
+               "URI":"/gists/:gist_id/comments",
+               "parameters":[
+                  {
+                     "Name":"gist_id",
+                     "Required":"Y",
+                     "Default":"",
+                     "Type":"integer",
+                     "Description":"ID of the gist to fetch"
+                  }
+               ]
+            },
+            {
+               "MethodName":"Gist Comments",
+               "Synopsis":"Create a gist comment",
+               "RequiresOAuth": "Y",
+               "HTTPMethod":"POST",
+               "URI":"/gists/:gist_id/comments",
+               "parameters":[
+                  {
+                     "Name":"gist_id",
+                     "Required":"Y",
+                     "Default":"",
+                     "Type":"integer",
+                     "Description":"ID of gist to comment on"
+                  },
+                  {
+                      "Name":"body",
+                      "Required":"Y",
+                      "Default":"Some comment",
+                      "Type":"text",
+                      "Description":"The comment to add"
+                  }
+               ]
             }
          ]
       }
