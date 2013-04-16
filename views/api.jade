@@ -29,13 +29,17 @@ form#credentials
              - else
                  - var defaultSecret =''
              div
-                 label(for='key') API Key
-                 input(id='key', name='key', value=defaultKey, style='color=#EEEEEE')
+                 - if (apiInfo.auth == 'oauth2')
+                     label(for='key') Access Token (yes, cheating) 
+                     input(id='key', name='key', style='color=#EEEEEE')
+                 - else
+                     label(for='key') API Key
+                     input(id='key', name='key', value=defaultKey, style='color=#EEEEEE')
              div
-                 - if (apiInfo.oauth || apiInfo.signature)
+                 - if (apiInfo.auth == 'oauth' || apiInfo.signature)
                      label(for='secret') Shared Secret
                      input(id='secret', name='secret', value=defaultSecret, style='color=#EEEEEE')
-             - if (apiInfo.oauth && apiInfo.oauth.type !='two-legged')
+             - if (apiInfo.auth == 'oauth' && apiInfo.oauth && apiInfo.oauth.type !='two-legged')
                  div
                     input(name='oauth', value='Authenticate with OAuth', type='submit', id='oauth-auth')
 

@@ -38,7 +38,8 @@ var express     = require('express'),
 
 // Configuration
 try {
-    var config = require('./config.json');
+    var configJSON = fs.readFileSync(__dirname + "/config.json");
+    var config = JSON.parse(configJSON.toString());
 } catch(e) {
     console.error("File config.json not found or is invalid.  Try: `cp config.json.sample config.json`");
     process.exit(1);
@@ -68,16 +69,14 @@ db.on("error", function(err) {
 //
 // Load API Configs
 //
-
-try {
-    var apisConfig = require('./public/data/apiconfig.json');
+var apisConfig;
+fs.readFile('public/data/apiconfig.json', 'utf-8', function(err, data) {
+    if (err) throw err;
+    apisConfig = JSON.parse(data);
     if (config.debug) {
-        console.log(util.inspect(apisConfig));
+         console.log(util.inspect(apisConfig));
     }
-} catch(e) {
-    console.error("File apiconfig.json not found or is invalid.");
-    process.exit(1);
-}
+});
 
 var app = module.exports = express.createServer();
 
@@ -126,7 +125,7 @@ function oauth(req, res, next) {
     var apiName = req.body.apiName,
         apiConfig = apisConfig[apiName];
 
-    if (apiConfig.oauth) {
+    if (apiConfig.auth == "oauth") {
         var apiKey = req.body.apiKey || req.body.key,
             apiSecret = req.body.apiSecret || req.body.secret,
             refererURL = url.parse(req.headers.referer),
@@ -277,9 +276,7 @@ function processRequest(req, res, next) {
     };
 
     var reqQuery = req.body,
-        customHeaders = {},
         params = reqQuery.params || {},
-        locations = reqQuery.locations || {},
         methodURL = reqQuery.methodUri,
         httpMethod = reqQuery.httpMethod,
         apiKey = reqQuery.apiKey,
@@ -287,19 +284,6 @@ function processRequest(req, res, next) {
         apiName = reqQuery.apiName
         apiConfig = apisConfig[apiName],
         key = req.sessionID + ':' + apiName;
-
-    // Extract custom headers from the params
-    for( var param in params ) 
-    {
-         if (params.hasOwnProperty(param)) 
-         {
-            if (params[param] !== '' && locations[param] == 'header' ) 
-            {
-                customHeaders[param] = params[param];
-                delete params[param];
-            }
-         }
-    }
 
     // Replace placeholders in the methodURL with matching params
     for (var param in params) {
@@ -322,16 +306,11 @@ function processRequest(req, res, next) {
     var baseHostInfo = apiConfig.baseURL.split(':');
     var baseHostUrl = baseHostInfo[0],
         baseHostPort = (baseHostInfo.length > 1) ? baseHostInfo[1] : "";
-    var headers = {};
-    for( header in apiConfig.headers )
-        headers[header] = apiConfig.headers[header];
-    for( header in customHeaders )
-        headers[header] = customHeaders[header];
 
     var paramString = query.stringify(params),
         privateReqURL = apiConfig.protocol + '://' + apiConfig.baseURL + apiConfig.privatePath + methodURL + ((paramString.length > 0) ? '?' + paramString : ""),
         options = {
-            headers: headers,
+            headers: {},
             protocol: apiConfig.protocol + ':',
             host: baseHostUrl,
             port: baseHostPort,
@@ -340,7 +319,12 @@ function processRequest(req, res, next) {
         };
 
     if (['POST','DELETE','PUT'].indexOf(httpMethod) !== -1) {
-        var requestBody = query.stringify(params);
+        // handle JSON senders
+        if (apiConfig.sendFormat && apiConfig.sendFormat == 'json') {
+            var requestBody = JSON.stringify(params);
+        } else {
+            var requestBody = query.stringify(params);
+        }
     }
 
     if (apiConfig.oauth) {
@@ -497,8 +481,8 @@ function processRequest(req, res, next) {
             options.path += ((paramString.length > 0) ? '?' + paramString : "");
         }
 
-        // Add API Key to params, if any.
-        if (apiKey != '' && apiKey != 'undefined' && apiKey != undefined) {
+        // Add API Key to params, if any (except if it's OAuth2)
+        if (apiKey != '' && apiKey != 'undefined' && apiKey != undefined && apiConfig.auth != "oauth2") {
             if (options.path.indexOf('?') !== -1) {
                 options.path += '&';
             }
@@ -542,9 +526,11 @@ function processRequest(req, res, next) {
 
             options.headers = headers;
         }
-        if(options.headers === void 0){
-            options.headers = {}
+
+        if (apiConfig.auth == 'oauth2' && req.body.oauth == 'authrequired') {
+            options.headers['Authorization'] = apiConfig.keyParam + " " + req.body.apiKey;
         }
+
         if (!options.headers['Content-Length']) {
             if (requestBody) {
                 options.headers['Content-Length'] = requestBody.length;
@@ -554,8 +540,12 @@ function processRequest(req, res, next) {
             }
         }
 
-        if (!options.headers['Content-Type'] && requestBody) {
-            options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        if (requestBody) {
+            if (apiConfig.sendFormat && apiConfig.sendFormat == 'json') {
+                options.headers['Content-Type'] = 'application/json';
+            } else {
+                options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+            }
         }
 
         if (config.debug) {
@@ -643,7 +633,7 @@ app.dynamicHelpers({
         if (!req.params.api) {
             pathName = req.url.replace('/','');
             // Is it a valid API - if there's a config file we can assume so
-            fs.stat(__dirname + '/public/data/' + pathName + '.json', function (error, stats) {
+            fs.stat('public/data/' + pathName + '.json', function (error, stats) {
                 if (stats) {
                     req.params.api = pathName;
                 }
@@ -670,7 +660,8 @@ app.dynamicHelpers({
     },
     apiDefinition: function(req, res) {
         if (req.params.api) {
-            return require(__dirname + '/public/data/' + req.params.api + '.json');
+            var data = fs.readFileSync('public/data/' + req.params.api + '.json');
+            return JSON.parse(data);
         }
     }
 })
@@ -714,7 +705,6 @@ app.post('/upload', function(req, res) {
 
 // API shortname, all lowercase
 app.get('/:api([^\.]+)', function(req, res) {
-    req.params.api=req.params.api.replace(/\/$/,'');
     res.render('api');
 });
 

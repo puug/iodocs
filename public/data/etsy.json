@@ -1,0 +1,55 @@
+{
+   "endpoints":[
+      {
+         "name":"Etsy Demo",
+         "methods":[
+            {
+               "MethodName":"Listings",
+               "Synopsis":"This method allows you to retrieve products",
+               "HTTPMethod":"GET",
+               "URI":"/listings/active",
+               "parameters":[
+                  {
+                     "Name":"tags",
+                     "Required":"N",
+                     "Default":"",
+                     "Type":"string",
+                     "Description":"Product tag to search for"
+                  }
+               ]
+            },
+            {
+               "MethodName":"User Shops",
+               "Synopsis":"Get a particular user's shops",
+               "HTTPMethod":"GET",
+               "URI":"/users/:user_id/shops",
+               "parameters":[
+                  {
+                     "Name":"user_id",
+                     "Required":"Y",
+                     "Default":"",
+                     "Type":"integer",
+                     "Description":"ID of the user whose shops should be fetched"
+                  }
+               ]
+            },
+            {
+               "MethodName":"Shop Products",
+               "Synopsis":"Get active products for one shop",
+               "HTTPMethod":"GET",
+               "URI":"/shops/:shop_id/listings/active",
+               "parameters":[
+                  {
+                     "Name":"shop_id",
+                     "Required":"Y",
+                     "Default":"",
+                     "Type":"integer",
+                     "Description":"ID of the shop whose products should be fetched"
+                  }
+               ]
+            }
+         ]
+      }
+   ]
+}
+

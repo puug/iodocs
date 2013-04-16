@@ -1,0 +1,93 @@
+{
+   "endpoints":[
+      {
+         "name":"Github Demo",
+         "methods":[
+            {
+               "MethodName":"User Repos",
+               "Synopsis":"See the repositories belonging to a user",
+               "HTTPMethod":"GET",
+               "URI":"/users/:username/repos",
+               "parameters":[
+                  {
+                     "Name":"username",
+                     "Required":"Y",
+                     "Default":"",
+                     "Type":"string",
+                     "Description":"Username of the user whose repositories should be fetched"
+                  }
+               ]
+            },
+            {
+               "MethodName":"User Gists",
+               "Synopsis":"See the gists belonging to a user",
+               "HTTPMethod":"GET",
+               "URI":"/users/:username/gists",
+               "parameters":[
+                  {
+                     "Name":"username",
+                     "Required":"Y",
+                     "Default":"",
+                     "Type":"string",
+                     "Description":"Username of the user whose gists should be fetched"
+                  }
+               ]
+            },
+            {
+               "MethodName":"One Gist",
+               "Synopsis":"See a gist",
+               "HTTPMethod":"GET",
+               "URI":"/gists/:gist_id",
+               "parameters":[
+                  {
+                     "Name":"gist_id",
+                     "Required":"Y",
+                     "Default":"",
+                     "Type":"integer",
+                     "Description":"ID of the gist to fetch"
+                  }
+               ]
+            },
+            {
+               "MethodName":"Gist Comments",
+               "Synopsis":"See a gist's comments",
+               "HTTPMethod":"GET",
+               "URI":"/gists/:gist_id/comments",
+               "parameters":[
+                  {
+                     "Name":"gist_id",
+                     "Required":"Y",
+                     "Default":"",
+                     "Type":"integer",
+                     "Description":"ID of the gist to fetch"
+                  }
+               ]
+            },
+            {
+               "MethodName":"Gist Comments",
+               "Synopsis":"Create a gist comment",
+               "RequiresOAuth": "Y",
+               "HTTPMethod":"POST",
+               "URI":"/gists/:gist_id/comments",
+               "parameters":[
+                  {
+                     "Name":"gist_id",
+                     "Required":"Y",
+                     "Default":"",
+                     "Type":"integer",
+                     "Description":"ID of gist to comment on"
+                  },
+                  {
+                      "Name":"body",
+                      "Required":"Y",
+                      "Default":"Some comment",
+                      "Type":"text",
+                      "Description":"The comment to add"
+                  }
+               ]
+            }
+         ]
+      }
+   ]
+}
+
