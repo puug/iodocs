@@ -1,6 +1,6 @@
 I/O Docs - Open Source in Node.js
 =================================
-Copyright 2011 Mashery, Inc.
+Copyright 2012-2013 Mashery, Inc.
 
 [http://www.mashery.com](http://www.mashery.com)
 
@@ -71,7 +71,11 @@ Example:
     "baseURL": "api.lowercase.sample.com",
     "publicPath": "/v1",
     "auth": "key",
-    "keyParam": "api_key_var_name"
+    "keyParam": "api_key_var_name",
+    "headers": {
+                "Accept": "application/json",
+                "Foo": "bar"
+    }
 }
 ```
 
@@ -115,12 +119,16 @@ The *apiconfig.json* file contains high-level information about an API.
 
 ```js
 "lower": {
-   "name": "My API",
-   "protocol": "http",
-   "baseURL": "api.lowercase.sample.com",
-   "publicPath": "/v1",
-   "auth": "key",
-   "keyParam": "api_key_var_name"
+    "name": "My API",
+    "protocol": "http",
+    "baseURL": "api.lowercase.sample.com",
+    "publicPath": "/v1",
+    "auth": "key",
+    "keyParam": "api_key_var_name",
+    "headers": {
+                "Accept": "application/json",
+                "Foo": "bar"
+    }
 }
 ```
 
@@ -156,9 +164,13 @@ Line:
 
 7. "keyParam" key value is name of the query parameter that
     is added to an API request when the "auth" key value from
-    (5) is set to "key"
+    (5) is set to "key".
 
-8. Closing curly-bracket ;)
+8. "headers" object contains key value pairs of HTTP headers
+    that will be sent for each request for API. These are
+    static key/value pairs.
+
+12. Closing curly-bracket ;)
 
 
 ---
@@ -253,12 +265,12 @@ Line:
     "oauth" : {
        "type": "three-legged",
        "requestURL": "https://api.twitter.com/oauth/request_token",
-       "signinURL": "https://api.twitter.com/oauth/authorize?oauth_token="
+       "signinURL": "https://api.twitter.com/oauth/authorize?oauth_token=",
        "accessURL": "https://api.twitter.com/oauth/access_token",
        "version": "1.0",
-       "crypt": "HMAC-SHA1",
-   }
-   "keyParam": "",
+       "crypt": "HMAC-SHA1"
+   },
+   "keyParam": ""
 }
 ```
 
@@ -379,6 +391,11 @@ You should look at the *./public/data/* directory for examples.
                     "sugarbombs",
                     "frostedteeth"
                    ],
+                "EnumeratedDescription": {
+                    "fruitscoops": "Fruit Scoops (packed with fruit goodness)",
+                    "sugarbombs": "Sugar Bombs (filled with sugar)",
+                    "frostedteeth": "Frosted Teeth (sugar coating)"
+                   },
                 "Description":"The type of cereal desired"
              },
              {
@@ -425,9 +442,11 @@ Line:
 
 24. "EnumeratedList" key value is an array of enumerated values that will render a drop-down (select box) on the form.
 
-25. Each value in the list is a string.
+25. "EnumeratedDescription" key value is an object of enumerated values as keys, and their descriptions as values that will be displayed below the Description.
 
-35. "Type" key value is *boolean* that will render a drop-down (select box) on the form for *true* and *false*.
+26. Each value in the list is a string.
+
+27. "Type" key value is *boolean* that will render a drop-down (select box) on the form for *true* and *false*.
 
 SUPPORT
 =======

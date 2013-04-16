@@ -31,14 +31,14 @@ var express     = require('express'),
     query       = require('querystring'),
     url         = require('url'),
     http        = require('http'),
+    https       = require('https'),
     crypto      = require('crypto'),
     redis       = require('redis'),
     RedisStore  = require('connect-redis')(express);
 
 // Configuration
 try {
-    var configJSON = fs.readFileSync(__dirname + "/config.json");
-    var config = JSON.parse(configJSON.toString());
+    var config = require('./config.json');
 } catch(e) {
     console.error("File config.json not found or is invalid.  Try: `cp config.json.sample config.json`");
     process.exit(1);
@@ -68,14 +68,16 @@ db.on("error", function(err) {
 //
 // Load API Configs
 //
-var apisConfig;
-fs.readFile('public/data/apiconfig.json', 'utf-8', function(err, data) {
-    if (err) throw err;
-    apisConfig = JSON.parse(data);
+
+try {
+    var apisConfig = require('./public/data/apiconfig.json');
     if (config.debug) {
-         console.log(util.inspect(apisConfig));
+        console.log(util.inspect(apisConfig));
     }
-});
+} catch(e) {
+    console.error("File apiconfig.json not found or is invalid.");
+    process.exit(1);
+}
 
 var app = module.exports = express.createServer();
 
@@ -275,7 +277,9 @@ function processRequest(req, res, next) {
     };
 
     var reqQuery = req.body,
+        customHeaders = {},
         params = reqQuery.params || {},
+        locations = reqQuery.locations || {},
         methodURL = reqQuery.methodUri,
         httpMethod = reqQuery.httpMethod,
         apiKey = reqQuery.apiKey,
@@ -283,6 +287,19 @@ function processRequest(req, res, next) {
         apiName = reqQuery.apiName
         apiConfig = apisConfig[apiName],
         key = req.sessionID + ':' + apiName;
+
+    // Extract custom headers from the params
+    for( var param in params ) 
+    {
+         if (params.hasOwnProperty(param)) 
+         {
+            if (params[param] !== '' && locations[param] == 'header' ) 
+            {
+                customHeaders[param] = params[param];
+                delete params[param];
+            }
+         }
+    }
 
     // Replace placeholders in the methodURL with matching params
     for (var param in params) {
@@ -305,17 +322,26 @@ function processRequest(req, res, next) {
     var baseHostInfo = apiConfig.baseURL.split(':');
     var baseHostUrl = baseHostInfo[0],
         baseHostPort = (baseHostInfo.length > 1) ? baseHostInfo[1] : "";
+    var headers = {};
+    for( header in apiConfig.headers )
+        headers[header] = apiConfig.headers[header];
+    for( header in customHeaders )
+        headers[header] = customHeaders[header];
 
     var paramString = query.stringify(params),
         privateReqURL = apiConfig.protocol + '://' + apiConfig.baseURL + apiConfig.privatePath + methodURL + ((paramString.length > 0) ? '?' + paramString : ""),
         options = {
-            headers: {},
+            headers: headers,
             protocol: apiConfig.protocol + ':',
             host: baseHostUrl,
             port: baseHostPort,
             method: httpMethod,
-            path: apiConfig.publicPath + methodURL + ((paramString.length > 0) ? '?' + paramString : "")
+            path: apiConfig.publicPath + methodURL// + ((paramString.length > 0) ? '?' + paramString : "")
         };
+
+    if (['POST','DELETE','PUT'].indexOf(httpMethod) !== -1) {
+        var requestBody = query.stringify(params);
+    }
 
     if (apiConfig.oauth) {
         console.log('Using OAuth');
@@ -467,6 +493,10 @@ function processRequest(req, res, next) {
     function unsecuredCall() {
         console.log('Unsecured Call');
 
+        if (['POST','PUT','DELETE'].indexOf(httpMethod) === -1) {
+            options.path += ((paramString.length > 0) ? '?' + paramString : "");
+        }
+
         // Add API Key to params, if any.
         if (apiKey != '' && apiKey != 'undefined' && apiKey != undefined) {
             if (options.path.indexOf('?') !== -1) {
@@ -512,18 +542,40 @@ function processRequest(req, res, next) {
 
             options.headers = headers;
         }
-
+        if(options.headers === void 0){
+            options.headers = {}
+        }
         if (!options.headers['Content-Length']) {
-            options.headers['Content-Length'] = 0;
+            if (requestBody) {
+                options.headers['Content-Length'] = requestBody.length;
+            }
+            else {
+                options.headers['Content-Length'] = 0;
+            }
+        }
+
+        if (!options.headers['Content-Type'] && requestBody) {
+            options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
         }
 
         if (config.debug) {
             console.log(util.inspect(options));
         };
 
+        var doRequest;
+        if (options.protocol === 'https' || options.protocol === 'https:') {
+            console.log('Protocol: HTTPS');
+            options.protocol = 'https:'
+            doRequest = https.request;
+        } else {
+            console.log('Protocol: HTTP');
+            doRequest = http.request;
+        }
+
         // API Call. response is the response from the API, res is the response we will send back to the user.
-        var apiCall = http.request(options, function(response) {
+        var apiCall = doRequest(options, function(response) {
             response.setEncoding('utf-8');
+
             if (config.debug) {
                 console.log('HEADERS: ' + JSON.stringify(response.headers));
                 console.log('STATUS CODE: ' + response.statusCode);
@@ -573,27 +625,33 @@ function processRequest(req, res, next) {
             };
         });
 
-        apiCall.end();
+        if (requestBody) {
+            apiCall.end(requestBody, 'utf-8');
+        }
+        else {
+            apiCall.end();
+        }
     }
 }
+
 
 // Dynamic Helpers
 // Passes variables to the view
 app.dynamicHelpers({
     session: function(req, res) {
     // If api wasn't passed in as a parameter, check the path to see if it's there
- 	    if (!req.params.api) {
- 	    	pathName = req.url.replace('/','');
- 	    	// Is it a valid API - if there's a config file we can assume so
- 	    	fs.stat('public/data/' + pathName + '.json', function (error, stats) {
-   				if (stats) {
-   					req.params.api = pathName;
-   				}
- 			});
- 	    }       
- 	    // If the cookie says we're authed for this particular API, set the session to authed as well
+        if (!req.params.api) {
+            pathName = req.url.replace('/','');
+            // Is it a valid API - if there's a config file we can assume so
+            fs.stat(__dirname + '/public/data/' + pathName + '.json', function (error, stats) {
+                if (stats) {
+                    req.params.api = pathName;
+                }
+            });
+        }       
+        // If the cookie says we're authed for this particular API, set the session to authed as well
         if (req.params.api && req.session[req.params.api] && req.session[req.params.api]['authed']) {
-         	req.session['authed'] = true;
+            req.session['authed'] = true;
         }
 
         return req.session;
@@ -612,185 +670,11 @@ app.dynamicHelpers({
     },
     apiDefinition: function(req, res) {
         if (req.params.api) {
-            var data = fs.readFileSync('public/data/' + req.params.api + '.json');
-            
-            var jsonData = JSON.parse(data);
-            if(jsonData.endpoints != null) {
-                jsonData.endpoints = jsonData.endpoints.map(parseEndpointsJsonSchema);
-            }
-            if(jsonData.jsonSchemas != null) {
-                jsonData.jsonSchemas = jsonData.jsonSchemas.map(printSchemaStart);
-            }
-
-            return jsonData;
+            return require(__dirname + '/public/data/' + req.params.api + '.json');
         }
     }
 })
 
-
-function parseEndpointsJsonSchema(endpoint) {
-    if(endpoint.methods != null) {
-        endpoint.methods = endpoint.methods.map(parseMethodJsonSchema);
-    }
-    return endpoint;
-}
-
-function parseMethodJsonSchema(method) {
-    if(method.requestBodyJsonSchema != null) {
-        method.requestBodyJsonSchema = printSchemaStart(method.requestBodyJsonSchema);
-    }    
-    if(method.responseBodyJsonSchema != null) {
-        method.responseBodyJsonSchema = printSchemaStart(method.responseBodyJsonSchema);
-    }
-    return method;
-}
-/*
-function parseJsonSchema(jsonSchema) {
-    jsonSchema.prettyString = JSON.stringify(jsonSchema.properties, addTypeAnchors, '    ');
-    return jsonSchema;
-}
-
-function addTypeAnchors(key, value) {  
-  if (typeof(value) == "string") {
-    return "<a href='#jsonType-" + value + "'>" + value + "</a>";  
-  }  
-  return value;  
-} */
-
-var schemaConfig = {
-    padString: '    ',
-    numOfItemsInArray: 3
-}
-
-function printSchemaStart(jsonSchema) {
-    jsonSchema.prettyString = printSchema(jsonSchema, 0);
-    return jsonSchema;
-}
-
-function printSchema(jsonSchema, indentLevel) {
-    if(jsonSchema == null) {
-        return "null"; 
-    }
-    else if(jsonSchema.extends != null) {
-        return printSchemaExtends(jsonSchema, indentLevel);
-    }
-    else if(jsonSchema.enum != null) {
-        return printSchemaEnum(jsonSchema, indentLevel);
-    }
-    else if(isSchemaObject(jsonSchema)) {
-        return printSchemaObject(jsonSchema, indentLevel);
-    }
-    else if(isSchemaArray(jsonSchema)) {
-        return printSchemaArray(jsonSchema, indentLevel, 'items', null);
-    }
-    else {
-        return printSchemaPrimitive(jsonSchema, indentLevel);
-    }
-}
-
-function printSchemaObject(obj, indentLevel) {
-
-    console.log(JSON.stringify(obj))
-    console.log(indentLevel);
-
-    var out = "{";
-
-    var keys = Object.keys(obj.properties)
-    keys.forEach(function(key) {
-        var value = obj.properties[key];
-
-        out += padLine(indentLevel + 1) + "\"" + key + "\": ";
-        out += printSchema(value, indentLevel + 1);
-        
-        if(keys.lastIndexOf(key) < keys.length-1) {
-            out += ",";
-        }
-    });
-
-    return out + padLine(indentLevel) + "}";
-}
-
-function printSchemaArray(obj, indentLevel, field, quoteChar) {
-    var items = obj[field];
-    var out = "[";
-
-    for(var i=0; i<schemaConfig.numOfItemsInArray; i++) {
-        out += padLine(indentLevel + 1)
-        out += printSchema(obj.items, indentLevel + 1)
-
-        if(i<schemaConfig.numOfItemsInArray-1) {
-            out += ",";
-        }
-    }
-
-    return out + padLine(indentLevel) + "]";
-}
-
-function printSchemaExtends(obj, indentLevel) {
-    return "<a href='#jsonType-" + obj.extends + "'>" + obj.extends + "</a>";  
-}
-
-function printSchemaEnum(obj, indentLevel) {
-    var quoteChar = (obj.type == "string")? "\"": null; 
-    var items = obj.enum;
-    var out = "enum[";
-    items.forEach(function(item) {
-        out += padLine(indentLevel + 1);
-
-        if(quoteChar != null) {
-            out += quoteChar;
-        }
-
-        out += printSchema(item, indentLevel + 1);
-
-        if(quoteChar != null) {
-            out += quoteChar;
-        }
-
-        if(items.lastIndexOf(item) < items.length) {
-            out += ",";
-        }
-    });
-
-    return out + padLine(indentLevel) + "]";
-
-}
-
-function printSchemaPrimitive(obj, indentLevel) {
-    return (obj.type != null)? obj.type: obj;
-}
-
-function isSchemaObject(jsonSchema) {
-    if(jsonSchema.type == 'object') {
-        return true;
-    }
-    if(jsonSchema.type == undefined && jsonSchema.properties != null) {
-        return true;
-    }
-
-    return false;
-}
-
-function isSchemaArray(jsonSchema) {
-    if(jsonSchema.type == 'array') {
-        return true;
-    }
-    if(jsonSchema.type == undefined && jsonSchema.items != null) {
-        return true;
-    }
-
-    return false;
-}
-
-function padLine(indentLevel) {
-    var str = "\n";
-
-    for(var i = 0; i<indentLevel; i++) {
-       str +=  schemaConfig.padString;
-    }
-
-    return str;
-}
 
 //
 // Routes
@@ -806,7 +690,8 @@ app.post('/processReq', oauth, processRequest, function(req, res) {
     var result = {
         headers: req.resultHeaders,
         response: req.result,
-        call: req.call
+        call: req.call,
+        code: req.res.statusCode
     };
 
     res.send(result);
@@ -829,6 +714,7 @@ app.post('/upload', function(req, res) {
 
 // API shortname, all lowercase
 app.get('/:api([^\.]+)', function(req, res) {
+    req.params.api=req.params.api.replace(/\/$/,'');
     res.render('api');
 });
 
@@ -836,6 +722,8 @@ app.get('/:api([^\.]+)', function(req, res) {
 
 if (!module.parent) {
     var port = process.env.PORT || config.port;
-    app.listen(port);
-    console.log("Express server listening on port %d", app.address().port);
+    var l = app.listen(port);
+    l.on('listening', function(err) {
+        console.log("Express server listening on port %d", app.address().port);
+    });
 }
