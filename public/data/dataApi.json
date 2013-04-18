@@ -1,0 +1,26 @@
+{
+    "endpoints": [
+        {
+            "name": "Customer",
+            "methods": [
+                
+                {
+                    "MethodName": "Get Current Customer",
+                    "Synopsis": "Get the current customer",
+                    "HTTPMethod": "GET",
+                    "URI": "/customer",
+                    "RequiresOAuth": "Y",
+                    "parameters": [{
+                        "Name": "Accept",
+                        "Required": "Y",
+                        "Default": "application/json",
+                        "Location": "header",
+                        "Type": "string",
+                        "Description": ""
+                  }]
+                }
+            ]
+        }
+
+    ]
+}
